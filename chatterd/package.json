@@ -1,4 +1,11 @@
 {
+  "name": "chatterd",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
   "dependencies": {
     "express": "^4.21.2",
     "http2-express-bridge": "^1.0.7",

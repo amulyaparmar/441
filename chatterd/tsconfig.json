@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+      // https://aka.ms/tsconfig for definitions
+  
+      /* Language and Environment */
+      "target": "ES2022",                   // version of emitted JavaScript and compatible library
+      "module": "ES2022",                   // version of generated module code
+      "moduleResolution": "bundler",        // how TypeScript looks up a file from module
+  
+      /* Interop Constraints */
+      "verbatimModuleSyntax": true,         // transform and elide only imports/exports marked
+                                            // "type"; the rest are emitted per the "module" setting
+      "allowSyntheticDefaultImports": true, // can 'import x from y' even if y has no default export
+      "esModuleInterop": true,              // can import CommonJS modules;
+                                            // enables 'allowSyntheticDefaultImports'
+  
+      /* Type Checking */
+      "alwaysStrict": true,                 // always enable all strict type-checking options
+  
+      /* Completeness */
+      "skipLibCheck": true                  // skip type checking all .d.ts files
+    }
+  }
