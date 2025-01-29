@@ -229,7 +229,7 @@ keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 # Extensions for a typical CA
 
 extendedKeyUsage = serverAuth
-subjectAltName = IP:YOUR_SERVER_IP
+subjectAltName = IP:34.148.221.101
 
 # PKIX recommendation.
 
