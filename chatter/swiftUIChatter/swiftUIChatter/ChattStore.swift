@@ -118,5 +118,5 @@ final class ChattStore {
     private(set) var chatts = [Chatt]()
     private let nFields = Mirror(reflecting: Chatt()).children.count-1
 
-    private let serverUrl = "https://mada.eecs.umich.edu/"
+    private let serverUrl = "https://34.148.221.101/"
 }
