@@ -13,6 +13,10 @@ struct PostView: View {
 
     private let username = "amulya"
     @State private var message = "Some short sample text."
+    
+    @Environment(AudioPlayer.self) private var audioPlayer
+    @State private var isPresenting = false
+    @FocusState private var messageInFocus: Bool
 
     var body: some View {
         VStack {
@@ -21,6 +25,8 @@ struct PostView: View {
             TextEditor(text: $message)
                 .padding(EdgeInsets(top: 10, leading: 18, bottom: 0, trailing: 4))
                 .frame(minHeight: 80, maxHeight: 120)
+                .focused($messageInFocus)
+            Spacer().frame(maxHeight: .infinity)
         }
         .navigationTitle("Post")
         .navigationBarTitleDisplayMode(.inline)
@@ -28,6 +34,19 @@ struct PostView: View {
             ToolbarItem(placement:.topBarTrailing) {
                 SubmitButton()
             }
+            ToolbarItem(placement: .bottomBar) {
+                AudioButton(isPresenting: $isPresenting)
+            }
+        }
+        .fullScreenCover(isPresented: $isPresenting) {
+            AudioView(isPresented: $isPresenting, autoPlay: false)
+        }
+        .onAppear {
+            audioPlayer.setupRecorder()
+        }
+        .contentShape(.rect)
+        .onTapGesture {
+            messageInFocus.toggle()
         }
     }
 
@@ -46,5 +65,28 @@ struct PostView: View {
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.2 : 1)        
+    }
+}
+
+struct AudioButton: View {
+    @Binding var isPresenting: Bool
+    @Environment(AudioPlayer.self) private var audioPlayer
+
+    var body: some View {        
+        Button {
+            isPresenting.toggle()
+        } label: {
+            if let _ = audioPlayer.audio {
+                Image(systemName: "mic.fill")
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                    .scaleEffect(1.5)
+                    .foregroundColor(Color(.systemRed))
+            } else {
+                Image(systemName: "mic")
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0))
+                    .scaleEffect(1.5)
+                    .foregroundColor(Color(.systemGreen))
+            }
+        }   
     }
 }
