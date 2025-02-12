@@ -56,7 +56,9 @@ struct PostView: View {
         
         Button {
             isDisabled = true
-            ChattStore.shared.postChatt(Chatt(username: username, message: message)) {
+            ChattStore.shared.postChatt(Chatt(username: username, 
+                                            message: message, 
+                                            audio: audioPlayer.audio?.base64EncodedString())) {
                 ChattStore.shared.getChatts()
             }
             isPresented.toggle()

@@ -14,9 +14,29 @@ struct Chatt: Identifiable {
     var id: UUID?
     var timestamp: String?
     var altRow = true
+    @OptionalizedEmpty var audio: String?
 
     // so that we don't need to compare every property for equality
     static func ==(lhs: Chatt, rhs: Chatt) -> Bool {
         lhs.id == rhs.id
     }    
+}
+
+@propertyWrapper
+struct OptionalizedEmpty {
+    private var _value: String?
+    var wrappedValue: String? {
+        get { _value }
+        set {
+            guard let newValue else {
+                _value = nil
+                return
+            }
+            _value = (newValue == "null" || newValue.isEmpty) ? nil : newValue
+        }
+    }
+    
+    init(wrappedValue: String?) {
+        self.wrappedValue = wrappedValue
+    }
 }
