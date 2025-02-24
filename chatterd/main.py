@@ -21,6 +21,8 @@ routes = [
     Route("/postchatt/", handlers.postchatt, methods=["POST"]),
     Route("/getaudio/", handlers.getaudio, methods=["GET"]),
     Route("/postaudio/", handlers.postaudio, methods=["POST"]),
+    Route("/postauth/", handlers.postauth, methods=["POST"]),
+    Route("/adduser/", handlers.adduser, methods=["POST"]),
 ]
 
 # must come after route definitions
