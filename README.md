@@ -4,6 +4,7 @@
 
 - Chatter Lab: no team members
 - Audio Lab: Gideon Shaked (<gshaked@umich.edu>)
+- Signin Lab: Gideon Shaked (<gshaked@umich.edu>)
 
 ## Server Login Information
 
