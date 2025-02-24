@@ -1,7 +1,7 @@
 # Lab grading folders
 lab_grading/
 student_labs/
-project.pbxproj
+
 # EECS441 chatterd binary
 chatterd/chatterd
 chatterd/*/chatterd
