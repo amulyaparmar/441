@@ -15,8 +15,16 @@ struct PostView: View {
     @State private var message = "Some short sample text."
     
     @Environment(AudioPlayer.self) private var audioPlayer
-    @State private var isPresenting = false
+    @State private var isAudioPresenting = false
+    @State private var isSigninPresented = false
+    @State private var showAlert = false
     @FocusState private var messageInFocus: Bool
+    
+    enum AlertType {
+        case sendError, signinError
+    }
+    
+    @State private var alertType = AlertType.sendError
 
     var body: some View {
         VStack {
@@ -35,18 +43,29 @@ struct PostView: View {
                 SubmitButton()
             }
             ToolbarItem(placement: .bottomBar) {
-                AudioButton(isPresenting: $isPresenting)
+                AudioButton(isPresenting: $isAudioPresenting)
             }
         }
-        .fullScreenCover(isPresented: $isPresenting) {
-            AudioView(isPresented: $isPresenting, autoPlay: false)
+        .fullScreenCover(isPresented: $isAudioPresenting) {
+            AudioView(isPresented: $isAudioPresenting, autoPlay: false)
+        }
+        .sheet(isPresented: $isSigninPresented) {
+            SigninView(isPresented: $isSigninPresented)
         }
         .onAppear {
             audioPlayer.setupRecorder()
+            checkChatterID()
         }
         .contentShape(.rect)
         .onTapGesture {
             messageInFocus.toggle()
+        }
+    }
+    
+    private func checkChatterID() {
+        // Check if ChatterID is valid, if not show SigninView
+        if ChatterID.shared.id == nil {
+            isSigninPresented = true
         }
     }
 
@@ -55,18 +74,35 @@ struct PostView: View {
         @State var isDisabled: Bool = false
         
         Button {
-            isDisabled = true
-            ChattStore.shared.postChatt(Chatt(username: username, 
-                                            message: message, 
-                                            audio: audioPlayer.audio?.base64EncodedString())) {
-                ChattStore.shared.getChatts()
+            // Check for valid ChatterID first
+            if ChatterID.shared.id == nil {
+                alertType = .signinError
+                showAlert = true
+                return
             }
-            isPresented.toggle()
+            
+            isDisabled = true
+            Task(priority: .background) {
+                let result = await ChattStore.shared.postChatt(Chatt(username: username, 
+                                                                    message: message, 
+                                                                    audio: audioPlayer.audio?.base64EncodedString()))
+                if result != nil {
+                    await ChattStore.shared.getChatts()
+                    isPresented.toggle()
+                } else {
+                    alertType = .sendError
+                    showAlert = true
+                }
+            }
         } label: {
             Image(systemName: "paperplane")
         }
         .disabled(isDisabled)
-        .opacity(isDisabled ? 0.2 : 1)        
+        .opacity(isDisabled ? 0.2 : 1)
+        .alert(isPresented: $showAlert) {
+            return Alert(title: Text(alertType == .sendError ? "Send failed" : "Signin failed"), message: Text(alertType == .sendError ? "Chatt not posted" : "Please try again"), dismissButton: .cancel{
+                isPresented.toggle()})
+        }
     }
 }
 
@@ -92,3 +128,32 @@ struct AudioButton: View {
         }   
     }
 }
+
+/* struct SigninView: View {
+    @Binding var isPresented: Bool
+    
+    var body: some View {
+        VStack {
+            Text("Sign In")
+                .font(.largeTitle)
+                .padding()
+            
+            // Your sign-in implementation here
+            // This would update ChatterID.shared when successful
+            
+            Button("Sign In") {
+                // Simulate successful sign-in
+                ChatterID.shared.id = "user123"
+                ChatterID.shared.expiration = Date().addingTimeInterval(3600) // 1 hour from now
+                isPresented = false
+            }
+            .padding()
+            
+            Button("Cancel") {
+                isPresented = false
+            }
+            .padding()
+        }
+    }
+} */
+

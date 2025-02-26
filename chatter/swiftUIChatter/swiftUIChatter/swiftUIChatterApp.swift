@@ -10,7 +10,9 @@ import SwiftUI
 @main
 struct swiftUIChatterApp: App {
     init() {
-        ChattStore.shared.getChatts()
+        Task {
+            await ChattStore.shared.getChatts()
+        }
     }
 
     var body: some Scene {

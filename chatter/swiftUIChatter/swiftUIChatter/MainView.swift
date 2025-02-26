@@ -20,14 +20,17 @@ struct MainView: View {
         }
         .listStyle(.plain)
         .refreshable {
-            store.getChatts()
+            await store.getChatts()
         }
         .navigationTitle("Chatter")  
         .navigationBarTitleDisplayMode(.inline)          
         .toolbar {
             ToolbarItem(placement:.topBarTrailing) {
                 Button { 
-                    isPresenting.toggle() 
+                    Task {
+                        await ChatterID.shared.open()
+                        isPresenting.toggle()
+                    }
                 } label: {
                     Image(systemName: "square.and.pencil")
                 }
