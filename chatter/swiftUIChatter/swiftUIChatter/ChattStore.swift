@@ -29,7 +29,7 @@ final class ChattStore: @unchecked Sendable {
             }
         }
         
-        guard let apiUrl = URL(string: "\(serverUrl)getchatts/") else {
+        guard let apiUrl = URL(string: "\(serverUrl)getaudio/") else {
             print("getChatts: Bad URL")
             return
         }

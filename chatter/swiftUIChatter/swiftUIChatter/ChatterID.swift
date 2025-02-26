@@ -7,6 +7,7 @@
 
 
 import Foundation
+import LocalAuthentication
 
 final class ChatterID: @unchecked Sendable {
     static let shared = ChatterID() // create one instance of the class to be shared
@@ -20,11 +21,19 @@ final class ChatterID: @unchecked Sendable {
         set(newValue) { _id = newValue }
     }
     
+    #if targetEnvironment(simulator)
+    private let auth = LAContext()
+    #endif
+    
     func open() async {
         if expiration != Date(timeIntervalSince1970: 0.0) {
             // not first launch
             return
         }
+
+        #if targetEnvironment(simulator)
+        guard let _ = try? await auth.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "to allow simulator to access ChatterID in KeyChain") else { return }
+        #endif
 
         let searchFor: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
@@ -52,10 +61,17 @@ final class ChatterID: @unchecked Sendable {
             }
             
         case errSecItemNotFound:
+            // biometric check
+            let accessControl = SecAccessControlCreateWithFlags(nil,
+              kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
+              .userPresence,
+              nil)!
+            
             let item: [CFString: Any] = [
                 kSecClass: kSecClassGenericPassword,
                 kSecAttrDescription: "ChatterID",
-                kSecAttrLabel: df.string(from: expiration), // trailing comma ok
+                kSecAttrLabel: df.string(from: expiration),
+                kSecAttrAccessControl: accessControl  // biometric check
             ]
 
             let addStatus = SecItemAdd(item as CFDictionary, nil)
@@ -69,6 +85,10 @@ final class ChatterID: @unchecked Sendable {
     }
 
     func save() async {
+        #if targetEnvironment(simulator)
+        guard let _ = try? await auth.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "to allow simulator to access ChatterID in KeyChain") else { return }
+        #endif
+        
         let df = DateFormatter()
         df.dateFormat="yyyy-MM-dd HH:mm:ss '+'SSSS"
         
