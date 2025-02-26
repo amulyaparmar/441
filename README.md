@@ -3,8 +3,8 @@
 ## Team Members
 
 - Chatter Lab: no team members
-- Audio Lab: Gideon Shaked (<gshaked@umich.edu>)
-- Signin Lab: Gideon Shaked (<gshaked@umich.edu>)
+- Audio Lab: Amulya Parmar (<amulya@umich.edu>) Gideon Shaked (<gshaked@umich.edu>)
+- Signin Lab:Amulya Parmar (<amulya@umich.edu>) Gideon Shaked (<gshaked@umich.edu>)
 
 ## Server Login Information
 
