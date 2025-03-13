@@ -1,2 +1,3 @@
 Chatter lab grade: 100.0/100
 Audio lab grade: 100.0/100
+Signin lab grade: 96.0/100
