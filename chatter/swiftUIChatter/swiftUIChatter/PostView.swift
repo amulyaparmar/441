@@ -25,6 +25,12 @@ struct PostView: View {
     }
     
     @State private var alertType = AlertType.sendError
+    
+    @State private var image: UIImage? = nil
+    @State private var videoUrl: URL? = nil
+    
+    @State private var isPresenting = false
+    @State private var sourceType: UIImagePickerController.SourceType? = nil
 
     var body: some View {
         VStack {
@@ -34,6 +40,21 @@ struct PostView: View {
                 .padding(EdgeInsets(top: 10, leading: 18, bottom: 0, trailing: 4))
                 .frame(minHeight: 80, maxHeight: 120)
                 .focused($messageInFocus)
+            HStack (alignment: .top) {
+                if let videoUrl {
+                    VideoView(videoUrl: videoUrl)
+                        .scaledToFit()
+                        .frame(height: 181)
+                        .padding(.leading, 18)
+                }
+                Spacer()
+                if let image {
+                    Image(uiImage: image)
+                        .scaledToFit()
+                        .frame(height: 181)
+                        .padding(.trailing, 18)
+                }
+            }
             Spacer().frame(maxHeight: .infinity)
         }
         .navigationTitle("Post")
@@ -42,7 +63,9 @@ struct PostView: View {
             ToolbarItem(placement:.topBarTrailing) {
                 SubmitButton()
             }
-            ToolbarItem(placement: .bottomBar) {
+            ToolbarItemGroup(placement: .bottomBar) {
+                CameraButton()
+                AlbumButton()
                 AudioButton(isPresenting: $isAudioPresenting)
             }
         }
@@ -60,12 +83,39 @@ struct PostView: View {
         .onTapGesture {
             messageInFocus.toggle()
         }
+        .fullScreenCover(isPresented: $isPresenting) {
+            ImagePicker(sourceType: $sourceType, image: $image, videoUrl: $videoUrl)
+        }
     }
     
     private func checkChatterID() {
         // Check if ChatterID is valid, if not show SigninView
         if ChatterID.shared.id == nil {
             isSigninPresented = true
+        }
+    }
+
+    @ViewBuilder
+    func CameraButton() -> some View {
+        Button {
+            sourceType = .camera
+            isPresenting.toggle()
+        } label: {
+            Image(systemName: "iphone.rear.camera")
+                .padding(EdgeInsets(top: 0, leading: 60, bottom: 20, trailing: 0))
+                .scaleEffect(1.2)
+        }
+    }
+
+    @ViewBuilder
+    func AlbumButton() -> some View {
+        Button {
+            sourceType = .photoLibrary
+            isPresenting.toggle()
+        } label: {
+            Image(systemName: "photo.on.rectangle.angled")
+                .padding(EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 60))
+                .scaleEffect(1.2)
         }
     }
 
