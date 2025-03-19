@@ -15,7 +15,9 @@ struct Chatt: Identifiable {
     var timestamp: String?
     var altRow = true
     @OptionalizedEmpty var audio: String?
-
+    @OptionalizedEmpty var imageUrl: String?
+    @OptionalizedEmpty var videoUrl: String?
+    
     // so that we don't need to compare every property for equality
     static func ==(lhs: Chatt, rhs: Chatt) -> Bool {
         lhs.id == rhs.id

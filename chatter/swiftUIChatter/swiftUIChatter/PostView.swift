@@ -122,7 +122,7 @@ struct PostView: View {
     @ViewBuilder
     private func SubmitButton() -> some View {
         @State var isDisabled: Bool = false
-        
+
         Button {
             // Check for valid ChatterID first
             if ChatterID.shared.id == nil {
@@ -130,13 +130,19 @@ struct PostView: View {
                 showAlert = true
                 return
             }
-            
             isDisabled = true
             Task(priority: .background) {
-                let result = await ChattStore.shared.postChatt(Chatt(username: username, 
-                                                                    message: message, 
-                                                                    audio: audioPlayer.audio?.base64EncodedString()))
-                if result != nil {
+                let success = await ChattStore.shared.postChatt(
+                    Chatt(
+                        username: username,
+                        message: message,
+                        audio: audioPlayer.audio?.base64EncodedString()
+                    ),
+                    image: image,
+                    videoUrl: videoUrl
+                )
+                // If posting succeeded, refresh and dismiss
+                if success != nil {
                     await ChattStore.shared.getChatts()
                     isPresented.toggle()
                 } else {
@@ -150,8 +156,13 @@ struct PostView: View {
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.2 : 1)
         .alert(isPresented: $showAlert) {
-            return Alert(title: Text(alertType == .sendError ? "Send failed" : "Signin failed"), message: Text(alertType == .sendError ? "Chatt not posted" : "Please try again"), dismissButton: .cancel{
-                isPresented.toggle()})
+            Alert(
+                title: Text(alertType == .sendError ? "Send failed" : "Signin failed"),
+                message: Text(alertType == .sendError ? "Chatt not posted" : "Please try again"),
+                dismissButton: .cancel {
+                    isPresented.toggle()
+                }
+            )
         }
     }
 }

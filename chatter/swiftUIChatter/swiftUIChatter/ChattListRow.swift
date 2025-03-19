@@ -22,6 +22,23 @@ struct ChattListRow: View {
                     Text(timestamp).padding(EdgeInsets(top: 8, leading: 0, bottom: 0, trailing: 0)).font(.system(size: 14))
                 }
             }
+            HStack(alignment: .top) {
+                if let urlString = chatt.videoUrl, let videoUrl = URL(string: urlString) {
+                    VideoView(videoUrl: videoUrl)
+                        .scaledToFit()
+                        .frame(height: 181)
+                }
+                Spacer()
+                if let urlString = chatt.imageUrl, let imageUrl = URL(string: urlString) {
+                    AsyncImage(url: imageUrl) {
+                        $0.resizable()
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    .scaledToFit()
+                    .frame(height: 181)
+                }
+            }
             HStack {
                 if let message = chatt.message {
                     Text(message).padding(EdgeInsets(top: 8, leading: 0, bottom: 6, trailing: 0))
