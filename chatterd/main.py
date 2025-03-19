@@ -3,6 +3,8 @@ import handlers
 from psycopg_pool import AsyncConnectionPool
 from starlette.applications import Starlette
 from starlette.routing import Route
+from starlette.routing import Route, Mount
+from starlette.staticfiles import StaticFiles
 
 
 @asynccontextmanager
@@ -23,6 +25,10 @@ routes = [
     Route("/postaudio/", handlers.postaudio, methods=["POST"]),
     Route("/postauth/", handlers.postauth, methods=["POST"]),
     Route("/adduser/", handlers.adduser, methods=["POST"]),
+    Route("/getimages/", handlers.getimages, methods=["GET"]),
+    Route("/postimages/", handlers.postimages, methods=["POST"]),
+    # static files: https://www.starlette.io/staticfiles
+    Mount("/media/", app=StaticFiles(directory=handlers.MEDIA_ROOT), name="media"),
 ]
 
 # must come after route definitions

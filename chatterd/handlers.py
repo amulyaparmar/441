@@ -9,6 +9,8 @@ from uuid import UUID
 from google.auth.transport import requests
 from google.oauth2 import id_token
 import hashlib, time
+import os
+from werkzeug.utils import secure_filename
 
 
 @dataclass
@@ -196,6 +198,122 @@ async def postauth(request):
                 await cursor.execute(
                     "INSERT INTO chatts (username, message, id) VALUES (%s, %s, gen_random_uuid());",
                     (row[0], chatt.message),
+                )
+        return JSONResponse({})
+    except StringDataRightTruncation as err:
+        print(f"Message too long: {str(err)}")
+        return JSONResponse(f"Message too long", status_code=400)
+    except Exception as err:
+        print(f"{err=}")
+        return JSONResponse(f"{type(err).__name__}: {str(err)}", status_code=500)
+
+
+MEDIA_ROOT = "/home/ubuntu/441/chatterd/media/"
+MEDIA_MXSZ = 10485760  # 10 MB
+
+
+async def saveFormFile(fields, media, url, username, ext):
+    try:
+        file = fields[media]
+        if file.size > MEDIA_MXSZ:
+            # but the whole file will still be received, just not saved
+            raise BufferError
+    except KeyError:
+        return None  # not an error, media not sent
+    except Exception:
+        raise
+
+    try:
+        if not (filename := secure_filename(username)):
+            raise NameError
+
+        filename = f"{filename}-{str(time.time())}{ext}"
+        filepath = os.path.join(MEDIA_ROOT, filename)
+
+        # open(): https://docs.python.org/3/library/functions.html#open
+        with open(filepath, "wb") as f:
+            # write(): https://docs.python.org/3/tutorial/inputoutput.html#tut-files
+            # form.UploadFile.read(): https://www.starlette.io/requests/#request-files
+            f.write(await file.read(MEDIA_MXSZ))
+            f.close()
+
+        # url to string: https://stackoverflow.com/a/57514621/
+        return f"{url}{filename}"
+    except BaseException:
+        raise
+
+
+async def getaudio(request):
+    try:
+        async with main.server.pool.connection() as connection:
+            async with connection.cursor() as cursor:
+                await cursor.execute(
+                    "SELECT username, message, id, time, audio FROM chatts ORDER BY time DESC;"
+                )
+                return JSONResponse(jsonable_encoder(await cursor.fetchall()))
+    except Exception as err:
+        print(f"{err=}")
+        return JSONResponse(f"{type(err).__name__}: {str(err)}", status_code=500)
+
+
+async def postchatt(request):
+    try:
+        # loading json (not multipart/form-data)
+        chatt = Chatt(**(await request.json()))
+    except Exception as err:
+        print(f"{err=}")
+        return JSONResponse(f"Unprocessable entity: {str(err)}", status_code=422)
+
+    try:
+        async with main.server.pool.connection() as connection:
+            async with connection.cursor() as cursor:
+                await cursor.execute(
+                    "INSERT INTO chatts (username, message, id) VALUES "
+                    "(%s, %s, gen_random_uuid());",
+                    (chatt.username, chatt.message),
+                )
+        return JSONResponse({})
+    except StringDataRightTruncation as err:
+        print(f"Message too long: {str(err)}")
+        return JSONResponse(f"Message too long: {str(err)}", status_code=400)
+    except Exception as err:
+        print(f"{err=}")
+        return JSONResponse(f"{type(err).__name__}: {str(err)}", status_code=500)
+
+
+async def getimages(request):
+    try:
+        async with main.server.pool.connection() as connection:
+            async with connection.cursor() as cursor:
+                await cursor.execute(
+                    "SELECT username, message, id, time, imageurl, videourl FROM chatts ORDER BY time DESC;"
+                )
+                return JSONResponse(jsonable_encoder(await cursor.fetchall()))
+    except Exception as err:
+        print(f"{err=}")
+        return JSONResponse(f"{type(err).__name__}: {str(err)}", status_code=500)
+
+
+async def postimages(request):
+    try:
+        url = str(request.url_for("media", path="/"))
+        # loading form-encoded data
+        async with request.form() as fields:
+            username = fields["username"]
+            message = fields["message"]
+            imageurl = await saveFormFile(fields, "image", url, username, ".jpeg")
+            videourl = await saveFormFile(fields, "video", url, username, ".mp4")
+    except BaseException as err:
+        print(f"{err=}")
+        return JSONResponse("Unprocessable entity", status_code=422)
+
+    try:
+        async with main.server.pool.connection() as connection:
+            async with connection.cursor() as cursor:
+                await cursor.execute(
+                    "INSERT INTO chatts (username, message, id, imageurl, videourl) VALUES "
+                    "(%s, %s, gen_random_uuid(), %s, %s);",
+                    (username, message, imageurl, videourl),
                 )
         return JSONResponse({})
     except StringDataRightTruncation as err:
