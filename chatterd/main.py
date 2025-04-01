@@ -29,6 +29,8 @@ routes = [
     Route("/postimages/", handlers.postimages, methods=["POST"]),
     # static files: https://www.starlette.io/staticfiles
     Mount("/media/", app=StaticFiles(directory=handlers.MEDIA_ROOT), name="media"),
+    Route("/getmaps/", handlers.getmaps, methods=["GET"]),
+    Route("/postmaps/", handlers.postmaps, methods=["POST"]),
 ]
 
 # must come after route definitions
