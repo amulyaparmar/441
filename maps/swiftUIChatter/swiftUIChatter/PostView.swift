@@ -50,18 +50,21 @@ struct PostView: View {
         }
     }
 
+    @MainActor
     @ViewBuilder
     private func SubmitButton() -> some View {
         @State var isDisabled: Bool = false
         
         Button {
             isDisabled = true
-            ChattStore.shared.postChatt(Chatt(username: username, 
-                                            message: message, 
-                                            audio: audioPlayer.audio?.base64EncodedString())) {
-                ChattStore.shared.getChatts()
+            var geodata = GeoData(lat: LocManager.shared.location.coordinate.latitude, lon: LocManager.shared.location.coordinate.longitude, facing: LocManager.shared.compassHeading, speed: LocManager.shared.speed)
+            Task {
+                await geodata.setPlace()
+                ChattStore.shared.postChatt(Chatt(username: username, message: message, geodata: geodata)) {
+                    ChattStore.shared.getChatts()
+                }
+                isPresented.toggle()
             }
-            isPresented.toggle()
         } label: {
             Image(systemName: "paperplane")
         }

@@ -7,19 +7,26 @@
 
 
 import Foundation
+import CoreLocation
 
-struct Chatt: Identifiable {
+
+struct Chatt: Identifiable, Hashable {
     var username: String?
     var message: String?
     var id: UUID?
     var timestamp: String?
     var altRow = true
     @OptionalizedEmpty var audio: String?
-
+    var geodata: GeoData?
+    
     // so that we don't need to compare every property for equality
     static func ==(lhs: Chatt, rhs: Chatt) -> Bool {
-        lhs.id == rhs.id
-    }    
+        lhs.timestamp == rhs.timestamp
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 @propertyWrapper
@@ -39,4 +46,4 @@ struct OptionalizedEmpty {
     init(wrappedValue: String?) {
         self.wrappedValue = wrappedValue
     }
-}
+} 

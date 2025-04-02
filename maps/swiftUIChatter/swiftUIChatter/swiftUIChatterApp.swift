@@ -11,6 +11,7 @@ import SwiftUI
 struct swiftUIChatterApp: App {
     init() {
         ChattStore.shared.getChatts()
+        LocManager.shared.startUpdates()
     }
 
     var body: some Scene {

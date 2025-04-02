@@ -22,7 +22,7 @@ final class ChattStore {
             self.isRetrieving = true
         }
 
-        guard let apiUrl = URL(string: "\(serverUrl)getaudio/") else {
+        guard let apiUrl = URL(string: "\(serverUrl)getmaps/") else {
             print("getChatts: Bad URL")
             return
         }
@@ -55,12 +55,21 @@ final class ChattStore {
                 var _chatts = [Chatt]()
                 for chattEntry in chattsReceived {
                     if chattEntry.count == self.nFields {
+                        let geoArr = chattEntry[4]?.data(using: .utf8).flatMap {
+                            try? JSONSerialization.jsonObject(with: $0) as? [Any]
+                        }
                         _chatts.append(Chatt(username: chattEntry[0],
                                                 message: chattEntry[1],
-                                                 id: UUID(uuidString: chattEntry[2] ?? ""),
+                                                id: UUID(uuidString: chattEntry[2] ?? ""),
                                                  timestamp: chattEntry[3],
                                                  altRow: idx % 2 == 0,
-                                                 audio: chattEntry[4]))
+                                                 geodata: geoArr.map {
+                            GeoData(lat: $0[0] as! Double,
+                                    lon: $0[1] as! Double,
+                                    place: $0[2] as! String,
+                                    facing: $0[3] as! String,
+                                    speed: $0[4] as! String)
+                        }))
                         idx += 1
                     } else {
                         print("getChatts: Received unexpected number of fields: \(chattEntry.count) instead of \(self.nFields).")
@@ -71,16 +80,21 @@ final class ChattStore {
         }
     }
 
-        func postChatt(_ chatt: Chatt, completion: @escaping () -> ()) {
+    func postChatt(_ chatt: Chatt, completion: @escaping () -> ()) {
+        var geoObj: Data?
+        if let geodata = chatt.geodata {
+            geoObj = try? JSONSerialization.data(withJSONObject: [geodata.lat, geodata.lon, geodata.place, geodata.facing, geodata.speed])
+        }
+        
         let jsonObj = ["username": chatt.username,
                        "message": chatt.message,
-                       "audio": chatt.audio]
+                       "geodata": (geoObj == nil) ? nil : String(data: geoObj!, encoding: .utf8)]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObj) else {
             print("postChatt: jsonData serialization error")
             return
         }
                 
-        guard let apiUrl = URL(string: "\(serverUrl)postaudio/") else {
+        guard let apiUrl = URL(string: "\(serverUrl)postmaps/") else {
             print("postChatt: Bad URL")
             return
         }
@@ -118,7 +132,7 @@ final class ChattStore {
     private let synchronized = DispatchQueue(label: "synchronized", qos: .background)
 
     private(set) var chatts = [Chatt]()
-    private let nFields = Mirror(reflecting: Chatt()).children.count-1
+    private let nFields = 5 // Mirror(reflecting: Chatt()).children.count-1
 
     private let serverUrl = "https://24.199.89.71/"
 }

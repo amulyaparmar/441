@@ -259,6 +259,8 @@
 				DEVELOPMENT_TEAM = TFYHB5DBW5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "to show location of chattsTYG ";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "to show location of chattsTYG ";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "to show location of chattsTYG ";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "to record audio chatt";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -290,6 +292,8 @@
 				DEVELOPMENT_TEAM = TFYHB5DBW5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "to show location of chattsTYG ";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "to show location of chattsTYG ";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "to show location of chattsTYG ";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "to record audio chatt";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
